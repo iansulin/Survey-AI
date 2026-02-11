@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Section 3 – AI Adoption & Literacy</title>
+		<style>
+			:root {
+			--bg: #f8fafc; --card: #ffffff; --border: #e5e7eb;
+			--text: #111827; --muted: #6b7280; --accent: #2563eb; --divider: #f1f5f9;
+			}
+			* { box-sizing: border-box; }
+			body { margin: 0; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); line-height: 1.5; }
+			.container { max-width: 850px; padding: 20px 16px 60px; margin: auto; }
+			.card { background: var(--card); border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px; }
+			h2 { font-size: 1.15rem; margin-bottom: 20px; color: var(--accent); }
+			h3 { font-size: 1.1rem; color: var(--accent); margin: 30px 0 10px; }
+			.q-wrap { margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--divider); }
+			.q-text { font-weight: 600; font-size: 1rem; margin-bottom: 12px; display: block; }
+			.options-grid { display: flex; flex-direction: column; gap: 10px; }
+			.opt-label { 
+			display: flex; align-items: flex-start; padding: 12px; 
+			border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s; 
+			}
+			.opt-label:hover { background: #f8fafc; border-color: var(--accent); }
+			.opt-label input { margin-top: 4px; margin-right: 12px; transform: scale(1.2); }
+			/* Conditional Input Styling */
+			.other-input-wrap { display: none; margin-top: 10px; padding-left: 10px; border-left: 3px solid var(--accent); }
+			.other-text { 
+			width: 100%; padding: 10px; border-radius: 6px; 
+			border: 1px solid var(--border); font-size: 0.9rem; font-family: inherit;
+			}
+			.sticky-header { 
+			position: sticky; top: 0; z-index: 100; background: #eff6ff; 
+			border-bottom: 2px solid var(--accent); padding: 12px; font-weight: 700; 
+			text-align: center; font-size: 0.85rem; margin-bottom: 15px;
+			}
+			table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+			th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid var(--divider); }
+			.statement-text { text-align: left; width: 40%; font-size: 0.9rem; font-weight: 500; }
+			textarea { 
+			width: 100%; min-height: 80px; padding: 12px; border-radius: 8px; 
+			border: 1px solid var(--border); font-family: inherit; margin-top: 15px;
+			}
+			.button-container {
+			display: flex;            /* Enables Flexbox */
+			justify-content: space-between; /* Puts space between the buttons */
+			align-items: center;      /* Vertically centers them */
+			margin-top: 30px;         /* Adds some breathing room above */
+			gap: 10px;                /* Optional: space between buttons if the screen is small */
+			}
+			.next-area { text-align: right; margin-top: 30px; }
+			#nextBtn {
+			background: var(--accent);
+			color: white;
+			border: none;
+			padding: 14px 40px;
+			border-radius: 10px;
+			font-weight: 600;
+			cursor: pointer;
+			}
+			.prev-area { text-align: left; margin-top: 30px; }
+			#prevBtn {
+			background: var(--accent);
+			color: white;
+			border: none;
+			padding: 14px 40px;
+			border-radius: 10px;
+			font-weight: 600;
+			cursor: pointer;
+			}
+			.missing-field {
+			border: 2px solid #ef4444 !important; /* Red border */
+			background-color: #fef2f2 !important; /* Light red tint */
+			padding: 10px;
+			border-radius: 8px;
+			}
+			/* Specifically for table rows */
+			tr.missing-field {
+			outline: 2px solid #ff4d4d;
+			}
+			.modal-overlay {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0, 0, 0, 0.5); /* Dim the background */
+			z-index: 1000;
+			align-items: center;
+			justify-content: center;
+			}
+			.modal-box {
+			background: white;
+			padding: 25px;
+			border-radius: 12px;
+			max-width: 400px;
+			width: 90%;
+			text-align: center;
+			box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+			font-family: sans-serif;
+			}
+			.modal-box h3 { margin-top: 0; color: #333; }
+			.modal-box p { color: #666; margin-bottom: 20px; }
+			.modal-box button {
+			background: #007bff;
+			color: white;
+			border: none;
+			padding: 10px 30px;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 16px;
+			}
+
+			.progress-container {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+				gap: 10px;
+			}
+
+			.step {
+				height: 12px;
+				flex: 1; /* Makes them equal width */
+				background-color: #dcdde1; /* Gray for incomplete */
+				border-radius: 2px;
+				transition: background-color 0.3s ease;
+			}
+
+			.step.active {
+				background-color: #3498db; /* Blue for complete/current */
+			}
+
+			/* This hides the body until the translation is ready */
+			.skiptranslate + body {
+				display: block !important;
+			}
+
+			/* Hide the Google Translate top banner */
+			.goog-te-banner-frame.skiptranslate {
+				display: none !important;
+			}
+
+			/* Prevent page from shifting down */
+			body {
+				top: 0 !important;
+			}
+
+			/* Hide Google logo link */
+			.goog-logo-link {
+				display: none !important;
+			}
+
+			/* Hide "Powered by Google" text */
+			.goog-te-gadget {
+				font-size: 0 !important;
+				color: transparent !important;
+			}
+
+			/* Style only the dropdown itself */
+			.goog-te-gadget .goog-te-combo {
+				width: 100% !important;  /* fill parent width */
+				max-width: 100%;         /* ensure no overflow */
+				padding: 8px;
+				border-radius: 4px;
+				border: 1px solid #3498db;
+				color: #333;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="language-modal">
+			<div class="modal-content">
+				<p>Select your preferred language:</p>
+				<div id="google_translate_element"></div>
+			</div>
+		</div>
+		<div id="google_translate_element" style="display:none;"></div>
+
+		<script type="text/javascript">
+			function googleTranslateElementInit() {
+				new google.translate.TranslateElement({
+					pageLanguage: 'en',
+					// autoDisplay: false is key to preventing the "original text" popups
+					autoDisplay: false
+				}, 'google_translate_element');
+			}
+		</script>
+
+		<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+		<div class="progress-container">
+			<div class="step active"></div>
+			<div class="step active"></div>
+			<div class="step active"></div>
+			<div class="step"></div>
+		</div>
+		<div class="container">
+			<div class="card">
+				<h2>Personal vs. Research Use</h2>
+				<div class="q-wrap">
+					<span class="q-text">How frequently do you use AI tools for personal (non-research, everyday) purposes?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q32" value="1"> Never</label>
+						<label class="opt-label"><input type="radio" name="q32" value="2"> Less than once a month</label>
+						<label class="opt-label"><input type="radio" name="q32" value="3"> Monthly</label>
+						<label class="opt-label"><input type="radio" name="q32" value="4"> Weekly</label>
+						<label class="opt-label"><input type="radio" name="q32" value="5"> Daily</label>
+						<label class="opt-label"><input type="radio" name="q32" value="6"> Multiple times per day</label>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">For which personal purposes do you use AI tools? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q33" value="1"> Writing or communication assistance</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="2"> Information seeking or summarization</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="3"> Coding or technical problem-solving</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="4"> Creative tasks (text, images, media)</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="5"> Learning or skill development</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="6"> Personal organization or productivity</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="7"> I do not use AI tools for personal purposes</label>
+						<label class="opt-label"><input type="checkbox" name="q33" value="8" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q33_other_text" class="other-text" placeholder="Please specify other personal AI activities...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">How frequently do you use AI tools as part of your research or professional work?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q34" value="1"> Never</label>
+						<label class="opt-label"><input type="radio" name="q34" value="2"> Less than once a month</label>
+						<label class="opt-label"><input type="radio" name="q34" value="3"> Monthly</label>
+						<label class="opt-label"><input type="radio" name="q34" value="4"> Weekly</label>
+						<label class="opt-label"><input type="radio" name="q34" value="5"> Daily</label>
+						<label class="opt-label"><input type="radio" name="q34" value="6"> Multiple times per day</label>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">For which research-related purposes do you use AI tools? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q35" value="1"> Literature review or synthesis</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="2"> Data preprocessing or cleaning</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="3"> Statistical or predictive modeling</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="4"> Machine learning or AI model development</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="5"> Coding or software development</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="6"> Writing, editing, or grant preparation</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="7"> Clinical or public health decision support</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="8"> I do not use AI tools for research purposes</label>
+						<label class="opt-label"><input type="checkbox" name="q35" value="9" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q35_other_text" class="other-text" placeholder="Please describe additional research AI applications...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">Which statement best describes the relationship between your personal and research AI use?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q36" value="1"> Mainly personal use</label>
+						<label class="opt-label"><input type="radio" name="q36" value="2"> Mainly research use</label>
+						<label class="opt-label"><input type="radio" name="q36" value="3"> Extensive use in both contexts</label>
+						<label class="opt-label"><input type="radio" name="q36" value="4"> Use AI in neither context</label>
+						<label class="opt-label"><input type="radio" name="q36" value="5" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q36_other_text" class="other-text" placeholder="Please specify...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">How transferable are skills learned from personal AI use to your research work?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q37" value="1"> Not at all transferable</label>
+						<label class="opt-label"><input type="radio" name="q37" value="2"> Slightly transferable</label>
+						<label class="opt-label"><input type="radio" name="q37" value="3"> Moderately transferable</label>
+						<label class="opt-label"><input type="radio" name="q37" value="4"> Highly transferable</label>
+						<label class="opt-label"><input type="radio" name="q37" value="5"> Extremely transferable</label>
+						<label class="opt-label"><input type="radio" name="q37" value="6" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q37_other_text" class="other-text" placeholder="Please specify...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">How would you ideally like to use AI in your research? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q38" value="1"> Literature review or synthesis</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="2"> Data preprocessing or cleaning</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="3"> Statistical or predictive modeling</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="4"> Machine learning or AI model development</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="5"> Coding or software development</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="6"> Writing, editing, or grant preparation</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="7"> Clinical or public health decision support</label>
+						<label class="opt-label"><input type="checkbox" name="q38" value="8" class="other-trigger"> Other (please specify)</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q38_other_text" class="other-text" placeholder="Describe additional ideal uses...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">If your ideal AI use differs from your current use, why does this difference exist? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q39" value="1"> Lack of training or skills</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="2"> Limited access to tools or infrastructure</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="3"> Ethical or regulatory constraints</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="4"> Workflow integration issues</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="5"> Cost or licensing restrictions</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="6"> Time limitations</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="7"> Lack of institutional support</label>
+						<label class="opt-label"><input type="checkbox" name="q39" value="8" class="other-trigger"> Other (please specify)</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q39_other_text" class="other-text" placeholder="Elaborate on other reasons...">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<h2>Awareness & Familiarity</h2>
+				<div class="q-wrap">
+					<span class="q-text">Which categories of AI tools had you heard of or used prior to this survey? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q40" value="1"> General-purpose conversational AI assistants</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="2"> Coding or programming assistants</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="3"> Multimodal AI tools (text, image, audio, video)</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="4"> Domain-specific AI tools for health/biomedical</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="5"> Statistical or classical ML software with AI features</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="6"> Open-source or locally deployed AI models</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="7"> Commercial AI platforms requiring paid subscriptions</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="8"> Experimental or early-release AI tools</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="9"> I actively follow emerging AI tools and trends</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="10"> None of the above</label>
+						<label class="opt-label"><input type="checkbox" name="q40" value="11" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q40_other_text" class="other-text" placeholder="List other tools you are aware of...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">How would you describe your overall familiarity with the AI tool ecosystem?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q41" value="1"> Novice - I've heard the term "AI" but haven't used specific tools.</label>
+						<label class="opt-label"><input type="radio" name="q41" value="2"> Aware - I use one or two mainstream tools (e.g., ChatGPT, Gemini).</label>
+						<label class="opt-label"><input type="radio" name="q41" value="3"> Intermediate - I use various tools for different tasks (text, images, search).</label>
+						<label class="opt-label"><input type="radio" name="q41" value="4"> Advanced - I follow AI news and experiment with new tools regularly.</label>
+						<label class="opt-label"><input type="radio" name="q41" value="5"> Expert - I build with AI, use advanced prompting, or use specialized/niche tools.</label>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">How do you typically learn about new AI tools or trends? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q42" value="1"> Academic literature or conferences</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="2"> Professional networks or collaborators</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="3"> Social media or online communities</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="4"> News media or blogs</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="5"> Institutional communications or training</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="6"> Industry announcements</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="7"> I do not actively track AI trends</label>
+						<label class="opt-label"><input type="checkbox" name="q42" value="8" class="other-trigger"> Other</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q42_other_text" class="other-text" placeholder="Share other ways you learn...">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<h2>Sentiment & Outlook</h2>
+				<p class="section-description"><b>Please indicate your level of agreement with the following statements:</b></p>
+				<div class="sticky-header">1: Strongly disagree | 2: Disagree | 3: Neither | 4: Agree | 5: Strongly agree</div>
+				<table>
+					<thead>
+						<tr>
+							<th>Statement</th>
+							<th>1</th>
+							<th>2</th>
+							<th>3</th>
+							<th>4</th>
+							<th>5</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="statement-text">I feel excited about recent advances in AI technology.</td>
+							<td><input type="radio" name="q43_1" value="1"></td>
+							<td><input type="radio" name="q43_1" value="2"></td>
+							<td><input type="radio" name="q43_1" value="3"></td>
+							<td><input type="radio" name="q43_1" value="4"></td>
+							<td><input type="radio" name="q43_1" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I feel optimistic about the role of AI in my field.</td>
+							<td><input type="radio" name="q43_2" value="1"></td>
+							<td><input type="radio" name="q43_2" value="2"></td>
+							<td><input type="radio" name="q43_2" value="3"></td>
+							<td><input type="radio" name="q43_2" value="4"></td>
+							<td><input type="radio" name="q43_2" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I feel anxious about keeping up with rapid AI developments.</td>
+							<td><input type="radio" name="q43_3" value="1"></td>
+							<td><input type="radio" name="q43_3" value="2"></td>
+							<td><input type="radio" name="q43_3" value="3"></td>
+							<td><input type="radio" name="q43_3" value="4"></td>
+							<td><input type="radio" name="q43_3" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I worry that I may fall behind if I do not adopt AI tools.</td>
+							<td><input type="radio" name="q43_4" value="1"></td>
+							<td><input type="radio" name="q43_4" value="2"></td>
+							<td><input type="radio" name="q43_4" value="3"></td>
+							<td><input type="radio" name="q43_4" value="4"></td>
+							<td><input type="radio" name="q43_4" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I feel fatigued by the constant pace of new AI tools and trends.</td>
+							<td><input type="radio" name="q43_5" value="1"></td>
+							<td><input type="radio" name="q43_5" value="2"></td>
+							<td><input type="radio" name="q43_5" value="3"></td>
+							<td><input type="radio" name="q43_5" value="4"></td>
+							<td><input type="radio" name="q43_5" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I feel pressure to use AI even when I am uncertain of its value.</td>
+							<td><input type="radio" name="q43_6" value="1"></td>
+							<td><input type="radio" name="q43_6" value="2"></td>
+							<td><input type="radio" name="q43_6" value="3"></td>
+							<td><input type="radio" name="q43_6" value="4"></td>
+							<td><input type="radio" name="q43_6" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I am hesitant to trust the output produced by AI tools.</td>
+							<td><input type="radio" name="q43_7" value="1"></td>
+							<td><input type="radio" name="q43_7" value="2"></td>
+							<td><input type="radio" name="q43_7" value="3"></td>
+							<td><input type="radio" name="q43_7" value="4"></td>
+							<td><input type="radio" name="q43_7" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I worry that AI will make my current skills less relevant.</td>
+							<td><input type="radio" name="q43_8" value="1"></td>
+							<td><input type="radio" name="q43_8" value="2"></td>
+							<td><input type="radio" name="q43_8" value="3"></td>
+							<td><input type="radio" name="q43_8" value="4"></td>
+							<td><input type="radio" name="q43_8" value="5"></td>
+						</tr>
+						<tr>
+							<td class="statement-text">I feel overwhelmed by the amount of information I need to learn to use AI effectively.</td>
+							<td><input type="radio" name="q43_9" value="1"></td>
+							<td><input type="radio" name="q43_9" value="2"></td>
+							<td><input type="radio" name="q43_9" value="3"></td>
+							<td><input type="radio" name="q43_9" value="4"></td>
+							<td><input type="radio" name="q43_9" value="5"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
+				<h2>Barriers & Motivations</h2>
+				<div class="q-wrap">
+					<span class="q-text">Which factors currently limit your use of AI or prevent you from using it to its full potential in your research? (Select all that apply)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q44" value="1"> Implementation Complexity - Difficulty integrating AI into specialized research workflows</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="2"> The "Black Box" Problem - Concerns about validity, lack of transparency, or "hallucinations"</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="3"> Validation Burden - Time and effort required to manually verify AI outputs</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="4"> Resource Constraints - Limited access to appropriate or high-quality data, computing power, or data silos</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="5"> Subscription Fatigue - High costs or paywalls for specialized AI tools</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="6"> Legal & Ethical Risk - Uncertainty regarding liability, copyright, bias, or data privacy</label>    
+						<label class="opt-label"><input type="checkbox" name="q44" value="7"> Infrastructure Gaps - Lack of organizational support, mentorship, or infrastructure</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="8"> Training Time - Limited time to learn new skills, experiment with new tools, or stay updated on new trends</label>
+						<label class="opt-label"><input type="checkbox" name="q44" value="9" class="other-trigger"> Other (Please specify below)</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q44_other_text" class="other-text" placeholder="Describe other specific obstacles or technical hurdles...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">At which stage of the AI adoption process in your research do you most often experience difficulty?</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="radio" name="q45" value="1"> Discovery (Finding the right tools)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="2"> Access (Overcoming costs, setup, or paywalls)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="3"> Trial/Evaluation (Assessing if the tool meets requirements)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="4"> Integration (Merging the tool into existing workflows)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="5"> Verification (Trusting and validating the AI output)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="6"> Scaling (Maintaining use as tools and needs change)</label>
+						<label class="opt-label"><input type="radio" name="q45" value="7" class="other-trigger"> Other (Please specify)</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q45_other_text" class="other-text" placeholder="Elaborate on other specific friction in your workflow...">
+						</div>
+					</div>
+				</div>
+				<div class="q-wrap">
+					<span class="q-text">Which factors most strongly motivate or "trigger" your decision to utilize AI in your research? (Select up to 3)</span>
+					<div class="options-grid">
+						<label class="opt-label"><input type="checkbox" name="q46" value="1"> Complex Data - Analyzing high-volume or granular data (sensors, wearables, etc.)</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="2"> Enhanced Capability - Detecting patterns or insights humans might miss</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="3"> Strategic Relevance - Staying competitive for grants, clients, or career growth</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="4"> Scientific Discovery - Potential for breakthroughs in my field</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="5"> External Requirements - Mandates from employers, funders, or journals</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="6"> Efficiency - Automating repetitive tasks or administrative work</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="7"> Personal Interest - Intellectual curiosity and a desire to innovate</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="8"> Skill Augmentation - Helping me perform tasks outside my primary expertise</label>
+						<label class="opt-label"><input type="checkbox" name="q46" value="9" class="other-trigger"> Other (please specify)</label>
+						<div class="other-input-wrap">
+							<input type="text" name="q46_other_text" class="other-text" placeholder="Specify motivational triggers...">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<h2>Future</h2>
+				<div class="q-wrap">
+					<span class="q-text">When do you expect AI to reach the following levels of integration in your research field?</span>
+					<div class="sticky-header">1: Within 1 yr | 2: 3 yrs | 3: 5 yrs | 4: 10 yrs | 5: 10+ yrs | 6: Never</div>
+					<table>
+						<thead>
+							<tr>
+								<th></th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+								<th>6</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text"> AI will manage scheduling, documentation, and basic data entry.</td>
+								<td><input type="radio" name="q47_1" value="1"></td>
+								<td><input type="radio" name="q47_1" value="2"></td>
+								<td><input type="radio" name="q47_1" value="3"></td>
+								<td><input type="radio" name="q47_1" value="4"></td>
+								<td><input type="radio" name="q47_1" value="5"></td>
+								<td><input type="radio" name="q47_1" value="6"></td>
+							</tr>
+							<tr>
+								<td class="statement-text"> AI will analyze data and suggest insights; humans lead the design.</td>
+								<td><input type="radio" name="q47_2" value="1"></td>
+								<td><input type="radio" name="q47_2" value="2"></td>
+								<td><input type="radio" name="q47_2" value="3"></td>
+								<td><input type="radio" name="q47_2" value="4"></td>
+								<td><input type="radio" name="q47_2" value="5"></td>
+								<td><input type="radio" name="q47_2" value="6"></td>
+							</tr>
+							<tr>
+								<td class="statement-text"> AI will act as a creative partner in hypothesis and decision-making.</td>
+								<td><input type="radio" name="q47_3" value="1"></td>
+								<td><input type="radio" name="q47_3" value="2"></td>
+								<td><input type="radio" name="q47_3" value="3"></td>
+								<td><input type="radio" name="q47_3" value="4"></td>
+								<td><input type="radio" name="q47_3" value="5"></td>
+								<td><input type="radio" name="q47_3" value="6"></td>
+							</tr>
+							<tr>
+								<td class="statement-text"> AI will act as an auditor for bias, ethics, and quality control in research.</td>
+								<td><input type="radio" name="q47_4" value="1"></td>
+								<td><input type="radio" name="q47_4" value="2"></td>
+								<td><input type="radio" name="q47_4" value="3"></td>
+								<td><input type="radio" name="q47_4" value="4"></td>
+								<td><input type="radio" name="q47_4" value="5"></td>
+								<td><input type="radio" name="q47_4" value="6"></td>
+							</tr>
+							<tr>
+								<td class="statement-text"> AI will manage project lifecycles, resource allocation, and grant drafting.</td>
+								<td><input type="radio" name="q47_5" value="1"></td>
+								<td><input type="radio" name="q47_5" value="2"></td>
+								<td><input type="radio" name="q47_5" value="3"></td>
+								<td><input type="radio" name="q47_5" value="4"></td>
+								<td><input type="radio" name="q47_5" value="5"></td>
+								<td><input type="radio" name="q47_5" value="6"></td>
+							</tr>
+							<tr>
+								<td class="statement-text"> AI will conduct end-to-end research tasks independently.</td>
+								<td><input type="radio" name="q47_6" value="1"></td>
+								<td><input type="radio" name="q47_6" value="2"></td>
+								<td><input type="radio" name="q47_6" value="3"></td>
+								<td><input type="radio" name="q47_6" value="4"></td>
+								<td><input type="radio" name="q47_6" value="5"></td>
+								<td><input type="radio" name="q47_6" value="6"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="q-wrap">
+					<h2>Governance & Regulation</h2>
+					<span class="q-text">To what extent do you agree or disagree with the following statements regarding AI governance and regulation in research contexts?</span>
+					<div class="sticky-header">1: Strongly disagree | 2: Disagree | 3: Neither | 4: Agree | 5: Strongly agree</div>
+					<table>
+						<thead>
+							<tr>
+								<th></th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">Uniform global standards are necessary to effectively manage AI-related risks.</td>
+								<td><input type="radio" name="q48_1" value="1"></td>
+								<td><input type="radio" name="q48_1" value="2"></td>
+								<td><input type="radio" name="q48_1" value="3"></td>
+								<td><input type="radio" name="q48_1" value="4"></td>
+								<td><input type="radio" name="q48_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Legal mandates for AI-generated content watermarking should be required.</td>
+								<td><input type="radio" name="q48_2" value="1"></td>
+								<td><input type="radio" name="q48_2" value="2"></td>
+								<td><input type="radio" name="q48_2" value="3"></td>
+								<td><input type="radio" name="q48_2" value="4"></td>
+								<td><input type="radio" name="q48_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Legal liability for errors or harm caused by AI systems should be clearly defined.</td>
+								<td><input type="radio" name="q48_3" value="1"></td>
+								<td><input type="radio" name="q48_3" value="2"></td>
+								<td><input type="radio" name="q48_3" value="3"></td>
+								<td><input type="radio" name="q48_3" value="4"></td>
+								<td><input type="radio" name="q48_3" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Existing AI governance frameworks (laws, ethical guidelines, and company policies) are sufficient as they are.</td>
+								<td><input type="radio" name="q48_4" value="1"></td>
+								<td><input type="radio" name="q48_4" value="2"></td>
+								<td><input type="radio" name="q48_4" value="3"></td>
+								<td><input type="radio" name="q48_4" value="4"></td>
+								<td><input type="radio" name="q48_4" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Public disclosure of AI training data sources should be mandatory.</td>
+								<td><input type="radio" name="q48_5" value="1"></td>
+								<td><input type="radio" name="q48_5" value="2"></td>
+								<td><input type="radio" name="q48_5" value="3"></td>
+								<td><input type="radio" name="q48_5" value="4"></td>
+								<td><input type="radio" name="q48_5" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="button-container">
+				<button id="prevBtn" type="button" class="btn-secondary">Previous</button>
+				<button id="nextBtn" type="button" class="btn-primary">Next</button>
+			</div>
+		</div>
+		<div id="customAlert" class="modal-overlay">
+			<div class="modal-box">
+				<h3>Incomplete Questions</h3>
+				<p>It looks like you missed some questions. We've highlighted them for you.</p>
+				<button id="closeAlertBtn" type="button">OK</button>
+			</div>
+		</div>
+		</div>
+	</body>
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+		import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+		
+		// --- 1. FIREBASE CONFIG ---
+		const firebaseConfig = {
+		    apiKey: "AIzaSyCoHmEBbmo9JB8M69O5Udu_9aVZC7ZOEPc",
+		    authDomain: "research-healthai-perception.firebaseapp.com",
+		    projectId: "research-healthai-perception",
+		    storageBucket: "research-healthai-perception.firebasestorage.app",
+		    messagingSenderId: "711118612360",
+		    appId: "1:711118612360:web:466d7bce64aa56954d7c3d",
+		    measurementId: "G-R33FXV0290"
+		};
+		
+		const app = initializeApp(firebaseConfig);
+		const db = getFirestore(app);
+		
+		// --- 2. IDENTITY & TIMING ---
+		const uid = localStorage.getItem('survey_uid') || 'anonymous';
+		
+		const getFormattedDate = (date = new Date()) => {
+		    const pad = (num, size) => num.toString().padStart(size, '0');
+		    const y = date.getFullYear();
+		    const m = pad(date.getMonth() + 1, 2);
+		    const d = pad(date.getDate(), 2);
+		    const h = pad(date.getHours(), 2);
+		    const min = pad(date.getMinutes(), 2);
+		    const s = pad(date.getSeconds(), 2);
+		    const ms = pad(date.getMilliseconds(), 3);
+		    return `${y}-${m}-${d} ${h}:${min}:${s}.${ms}`;
+		};
+		
+		const startLocal = getFormattedDate();
+		const startUTC = new Date().toISOString().replace('T', ' ').replace('Z', ''); 
+		
+		// --- 3. SYNC DATA FUNCTION ---
+		async function syncData() {
+		    const getRadio = (name) => {
+		        const val = document.querySelector(`input[name="${name}"]:checked`)?.value;
+		        return val ? parseInt(val) : 0;
+		    };
+		
+		    const getCheckboxes = (name) => {
+		        const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`));
+		        return checked.map(cb => parseInt(cb.value));
+		    };
+		
+		    const getText = (name) => document.querySelector(`[name="${name}"]`)?.value || "";
+		
+		    const payload = {
+		    uid: uid,
+		    // OBJECT A: Research Data (Numbers)
+		    section_3: {
+		        metadata: {
+		            start_local: startLocal,
+		            start_utc: startUTC,
+		            last_sync_local: getFormattedDate(),
+		            server_ts: serverTimestamp()
+		        },
+		        q32_freq_personal: getRadio('q32'),
+		        q33_purposes_personal: getCheckboxes('q33'),
+		        q33_other: getText('q33_other_text'),
+		        q34_freq_research: getRadio('q34'),
+		        q35_purposes_research: getCheckboxes('q35'),
+		        q35_other: getText('q35_other_text'),
+		        q36_relationship: getRadio('q36'),
+		        q36_other: getText('q36_other_text'),
+		        q37_transferability: getRadio('q37'),
+		        q37_other: getText('q37_other_text'),
+		        q38_ideal_use: getCheckboxes('q38'),
+		        q38_other: getText('q38_other_text'),
+		        q39_barriers_gap: getCheckboxes('q39'),
+		        q39_other: getText('q39_other_text'),
+		        q40_categories: getCheckboxes('q40'),
+		        q40_other: getText('q40_other_text'),
+		        q41_familiarity: getRadio('q41'),
+		        q42_learning: getCheckboxes('q42'),
+		        q42_other: getText('q42_other_text'),
+		        q43_sentiment: [
+		            getRadio('q43_1'), getRadio('q43_2'), getRadio('q43_3'),
+		            getRadio('q43_4'), getRadio('q43_5'), getRadio('q43_6'),
+		            getRadio('q43_7'), getRadio('q43_8'), getRadio('q43_9')
+		        ],
+		        q44_barriers: getCheckboxes('q44'),
+		        q44_other: getText('q44_other_text'),
+		        q45_difficulty_stage: getRadio('q45'),
+		        q45_other: getText('q45_other_text'),
+		        q46_triggers: getCheckboxes('q46'),
+		        q46_other: getText('q46_other_text'),
+		        q47_future_timing: [
+		            getRadio('q47_1'), getRadio('q47_2'), getRadio('q47_3'),
+		            getRadio('q47_4'), getRadio('q47_5'), getRadio('q47_6')
+		        ],
+		        q48_governance: [
+		            getRadio('q48_1'), getRadio('q48_2'), getRadio('q48_3'),
+		            getRadio('q48_4'), getRadio('q48_5')
+		        ]
+		    },
+		    // OBJECT B: Form State (Strings for Resuming)
+		    form_state_3: {
+		        radios: Array.from(document.querySelectorAll('input[type="radio"]:checked')).map(r => ({name: r.name, val: r.value})),
+		        checkboxes: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => ({name: c.name, val: c.value})),
+		        textInputs: Array.from(document.querySelectorAll('input[type="text"]')).map(t => ({name: t.name, val: t.value}))
+		    }
+		};
+		
+		try {
+		    await setDoc(doc(db, "survey_data", uid), payload, { merge: true });
+		    console.log("Section 3 updated.");
+		} catch (e) {
+		    console.error("Firebase Error: ", e);
+		}
+		}
+		
+		
+		
+		// --- 4. RESUME LOGIC ---
+		async function loadAndRestore() {
+		    try {
+		        const docRef = doc(db, "survey_data", uid);
+		        const docSnap = await getDoc(docRef);
+		
+		        if (docSnap.exists() && docSnap.data().form_state_3) {
+		            const state = docSnap.data().form_state_3;
+		            console.log("Restoring Section 3 session...");
+		
+		            // Restore Radios
+		            if (state.radios) {
+		                state.radios.forEach(r => {
+		                    const el = document.querySelector(`input[name="${r.name}"][value="${r.val}"]`);
+		                    if (el) {
+		                        el.checked = true;
+		                        el.dispatchEvent(new Event('change', { bubbles: true }));
+		                    }
+		                });
+		            }
+		
+		            // Restore Checkboxes
+		            if (state.checkboxes) {
+		                state.checkboxes.forEach(c => {
+		                    const el = document.querySelector(`input[name="${c.name}"][value="${c.val}"]`);
+		                    if (el) {
+		                        el.checked = true;
+		                        el.dispatchEvent(new Event('change', { bubbles: true }));
+		                    }
+		                });
+		            }
+		
+		            // Restore Text Inputs
+		            if (state.textInputs) {
+		                state.textInputs.forEach(t => {
+		                    const el = document.querySelector(`input[name="${t.name}"]`);
+		                    if (el) el.value = t.val;
+		                });
+		            }
+		        }
+		    } catch (e) { console.error("Restore error:", e); }
+		    initListeners();
+		}
+		
+		// This makes the function "Global" so the HTML button can see it
+		window.closeAlert = function() {
+		    const modal = document.getElementById('customAlert');
+		    if (modal) {
+		        modal.style.display = 'none';
+		    }
+		};
+		
+		function initListeners() {
+		    document.getElementById('closeAlertBtn')?.addEventListener('click', window.closeAlert);
+		    document.addEventListener('change', (e) => {
+		    // Limit for Q46
+		    if (e.target.name === 'q46') {
+		        const checkedBoxes = document.querySelectorAll('input[name="q46"]:checked');
+		        if (checkedBoxes.length > 3) {
+		            e.target.checked = false;
+		            alert("Please select a maximum of 3 factors.");
+		            return; 
+		        }
+		    }
+		
+		    // Sync data
+		    if (e.target.type === 'radio' || e.target.type === 'checkbox') {
+		        syncData();
+		    }
+		
+		    // Handle "Other" visibility
+		    if (e.target.classList.contains('other-trigger')) {
+		        const wrap = e.target.closest('.opt-label').nextElementSibling;
+		        if (wrap && wrap.classList.contains('other-input-wrap')) {
+		        wrap.style.display = e.target.checked ? 'block' : 'none';
+		        }
+		    }
+		    
+		    // Hide "Other" for non-other radios
+		    if (e.target.type === 'radio' && !e.target.classList.contains('other-trigger')) {
+		        const otherRadio = document.querySelector(`input[name="${e.target.name}"].other-trigger`);
+		        if (otherRadio) {
+		        const wrap = otherRadio.closest('.opt-label').nextElementSibling;
+		        if (wrap) wrap.style.display = 'none';
+		        }
+		    }
+		    });
+		
+		    document.querySelectorAll('input[type="text"]').forEach(txt => {
+		    txt.addEventListener('input', syncData);
+		    });
+		}
+		
+		// --- 5. VALIDATION & NAVIGATION ---
+		let validationAttempts = 0;
+		
+		document.getElementById('nextBtn').addEventListener('click', async () => {
+		    document.querySelectorAll('.missing-field').forEach(el => el.classList.remove('missing-field'));
+		    let missingAny = false;
+		
+		    // Radio Groups
+		    ['q32', 'q34', 'q36', 'q37', 'q41', 'q45'].forEach(q => {
+		        if (!document.querySelector(`input[name="${q}"]:checked`)) {
+		            document.getElementsByName(q)[0]?.closest('.q-wrap')?.classList.add('missing-field');
+		            missingAny = true;
+		        }
+		    });
+		
+		    // Checkbox Groups
+		    ['q33', 'q35', 'q38', 'q39', 'q40', 'q42', 'q44', 'q46'].forEach(q => {
+		        if (document.querySelectorAll(`input[name="${q}"]:checked`).length === 0) {
+		            document.getElementsByName(q)[0]?.closest('.q-wrap')?.classList.add('missing-field');
+		            missingAny = true;
+		        }
+		    });
+		
+		    // Matrices
+		    const matrices = { 'q43': 9, 'q47': 6, 'q48': 5 };
+		    Object.keys(matrices).forEach(base => {
+		        for (let i = 1; i <= matrices[base]; i++) {
+		            if (!document.querySelector(`input[name="${base}_${i}"]:checked`)) {
+		                document.querySelector(`input[name="${base}_${i}"]`)?.closest('tr')?.classList.add('missing-field');
+		                missingAny = true;
+		            }
+		        }
+		    });
+		
+		    if (missingAny && validationAttempts === 0) {
+		        document.getElementById('customAlert').style.display = 'flex';
+		
+		        validationAttempts++;
+		        document.querySelector('.missing-field')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		        return;
+		    }
+		
+		    const btn = document.getElementById('nextBtn');
+		    btn.disabled = true;
+		    btn.innerText = "Saving...";
+		    await syncData();
+		    window.location.href = "section_4.html";
+		});
+		
+		// PREVIOUS BUTTON LOGIC (No validation needed to go back)
+		const prevBtn = document.getElementById('prevBtn');
+		if (prevBtn) {
+		    prevBtn.addEventListener('click', async () => {
+		        prevBtn.disabled = true;
+		        prevBtn.innerText = "Saving...";
+		        
+		        await syncData(); // Save whatever they have before going back
+		        window.location.href = "section_2.html";
+		    });
+		}
+		
+		loadAndRestore();
+	</script>
+</html>

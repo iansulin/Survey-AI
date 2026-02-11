@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Section 2 – AI Perceptions</title>
+		<style>
+			:root {
+			--bg: #f8fafc;
+			--card: #ffffff;
+			--border: #e5e7eb;
+			--text: #111827;
+			--muted: #6b7280;
+			--accent: #2563eb;
+			--divider: #f1f5f9;
+			}
+			body { 
+			margin: 0; 
+			background: var(--bg); 
+			font-family: system-ui, -apple-system, sans-serif; 
+			color: var(--text); 
+			}
+			.container { max-width: 850px; padding: 20px 16px 60px; margin: auto; }
+			/* REFINED STICKY HEADER */
+			.sticky-header {
+			position: -webkit-sticky;
+			position: sticky;
+			top: 0;
+			z-index: 1000; /* High z-index to stay above table borders */
+			background: #eff6ff;
+			border-bottom: 2px solid var(--accent);
+			padding: 12px;
+			font-size: 0.85rem;
+			font-weight: 700;
+			color: #1e40af;
+			text-align: center;
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			margin-bottom: 20px;
+			}
+			.card { 
+			background: var(--card); 
+			border-radius: 14px; 
+			padding: 24px; 
+			box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+			margin-bottom: 30px; 
+			overflow: visible; /* Crucial for sticky headers to work */
+			}
+			h2 { font-size: 1.4rem; margin-top: 0; }
+			h3 { font-size: 1rem; color: var(--accent); margin: 30px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+			/* TABLE STYLING (1-5 Section) */
+			.likert-container { overflow-x: auto; margin-bottom: 20px; }
+			table { width: 100%; border-collapse: collapse; min-width: 500px; }
+			th { font-size: 0.8rem; padding: 10px 5px; border-bottom: 2px solid var(--divider); vertical-align: bottom; }
+			td { padding: 16px 8px; text-align: center; border-bottom: 1px solid var(--divider); }
+			.statement-text { text-align: left; font-size: 0.95rem; width: 45%; font-weight: 500; }
+			/* 1-10 GRID STYLING (Intensity Section) */
+			.scale-row { 
+			display: flex; 
+			justify-content: space-between; 
+			gap: 4px; 
+			margin-top: 8px; 
+			}
+			.scale-item { flex: 1; }
+			.scale-item input { display: none; }
+			.scale-item label { 
+			display: block; 
+			padding: 10px 0; 
+			border: 1px solid var(--border); 
+			border-radius: 6px; 
+			text-align: center; 
+			cursor: pointer; 
+			font-size: 0.85rem; 
+			background: white; 
+			transition: all 0.2s ease;
+			}
+			/* Hover & Active States for Buttons */
+			.scale-item label:hover { background: #f1f5f9; }
+			.scale-item input:checked + label { 
+			background: var(--accent); 
+			color: white; 
+			border-color: var(--accent); 
+			font-weight: bold; 
+			box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+			}
+			.exp-item { 
+			margin-bottom: 24px; 
+			padding-bottom: 15px; 
+			border-bottom: 1px solid var(--divider); 
+			}
+			input[type="radio"] { transform: scale(1.3); cursor: pointer; }
+			tr:hover { background-color: #fcfcfc; }
+			/* CONFLICT RESOLUTION STYLING */
+			.radio-group { margin-top: 20px; }
+			.radio-option {
+			display: flex; align-items: flex-start; background: #fdfdfd; border: 1px solid var(--border);
+			padding: 15px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;
+			}
+			.radio-option:hover { background: #f8fafc; border-color: var(--accent); }
+			.radio-option input { margin-top: 5px; margin-right: 15px; transform: scale(1.2); }
+			.option-content strong { display: block; color: var(--text); margin-bottom: 2px; }
+			.option-content small { color: var(--muted); font-size: 0.9rem; }
+			textarea { width: 100%; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; }
+			.button-container {
+			display: flex;            /* Enables Flexbox */
+			justify-content: space-between; /* Puts space between the buttons */
+			align-items: center;      /* Vertically centers them */
+			margin-top: 30px;         /* Adds some breathing room above */
+			gap: 10px;                /* Optional: space between buttons if the screen is small */
+			}
+			.next-area { text-align: right; margin-top: 30px; }
+			#nextBtn {
+			background: var(--accent);
+			color: white;
+			border: none;
+			padding: 14px 40px;
+			border-radius: 10px;
+			font-weight: 600;
+			cursor: pointer;
+			}
+			.prev-area { text-align: left; margin-top: 30px; }
+			#prevBtn {
+			background: var(--accent);
+			color: white;
+			border: none;
+			padding: 14px 40px;
+			border-radius: 10px;
+			font-weight: 600;
+			cursor: pointer;
+			}
+			.missing-field {
+			border: 2px solid #ef4444 !important; /* Red border */
+			background-color: #fef2f2 !important; /* Light red tint */
+			padding: 10px;
+			border-radius: 8px;
+			}
+			/* Specifically for table rows */
+			tr.missing-field {
+			outline: 2px solid #ff4d4d;
+			}
+			.modal-overlay {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0, 0, 0, 0.5); /* Dim the background */
+			z-index: 1000;
+			align-items: center;
+			justify-content: center;
+			}
+			.modal-box {
+			background: white;
+			padding: 25px;
+			border-radius: 12px;
+			max-width: 400px;
+			width: 90%;
+			text-align: center;
+			box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+			font-family: sans-serif;
+			}
+			.modal-box h3 { margin-top: 0; color: #333; }
+			.modal-box p { color: #666; margin-bottom: 20px; }
+			.modal-box button {
+			background: #007bff;
+			color: white;
+			border: none;
+			padding: 10px 30px;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 16px;
+			}
+
+			.progress-container {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+				gap: 10px;
+			}
+
+			.step {
+				height: 12px;
+				flex: 1; /* Makes them equal width */
+				background-color: #dcdde1; /* Gray for incomplete */
+				border-radius: 2px;
+				transition: background-color 0.3s ease;
+			}
+
+			.step.active {
+				background-color: #3498db; /* Blue for complete/current */
+			}
+
+			.skiptranslate + body {
+				display: block !important;
+			}
+
+			/* Hide the Google Translate top banner */
+			.goog-te-banner-frame.skiptranslate {
+				display: none !important;
+			}
+
+			/* Prevent page from shifting down */
+			body {
+				top: 0 !important;
+			}
+
+			/* Hide Google logo link */
+			.goog-logo-link {
+				display: none !important;
+			}
+
+			/* Hide "Powered by Google" text */
+			.goog-te-gadget {
+				font-size: 0 !important;
+				color: transparent !important;
+			}
+
+			/* Style only the dropdown itself */
+			.goog-te-gadget .goog-te-combo {
+				width: 100% !important;  /* fill parent width */
+				max-width: 100%;         /* ensure no overflow */
+				padding: 8px;
+				border-radius: 4px;
+				border: 1px solid #3498db;
+				color: #333;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="language-modal">
+			<div class="modal-content">
+				<p>Select your preferred language:</p>
+				<div id="google_translate_element"></div>
+			</div>
+		</div>
+		<div id="google_translate_element" style="display:none;"></div>
+
+		<script type="text/javascript">
+			function googleTranslateElementInit() {
+				new google.translate.TranslateElement({
+					pageLanguage: 'en',
+					// autoDisplay: false is key to preventing the "original text" popups
+					autoDisplay: false
+				}, 'google_translate_element');
+			}
+		</script>
+
+		<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+		<div class="progress-container">
+			<div class="step active"></div>
+			<div class="step active"></div>
+			<div class="step"></div>
+			<div class="step"></div>
+		</div>
+		<div class="container">
+			<div class="card">
+				<p class="section-description"><strong>For each statement below, please indicate how much you agree or disagree with the following statements using the following scale:</strong></p>
+				<div class="sticky-header">
+					1: Strongly disagree | 2: Disagree | 3: Neither | 4: Agree | 5: Strongly agree
+				</div>
+				<h3>A. Trust in AI</h3>
+				<div class="likert-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Statement</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">I trust AI systems to produce valid results when applied appropriately in research.</td>
+								<td><input type="radio" name="q13_1" value="1"></td>
+								<td><input type="radio" name="q13_1" value="2"></td>
+								<td><input type="radio" name="q13_1" value="3"></td>
+								<td><input type="radio" name="q13_1" value="4"></td>
+								<td><input type="radio" name="q13_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI methods can be as scientifically rigorous as traditional analytical approaches.</td>
+								<td><input type="radio" name="q13_2" value="1"></td>
+								<td><input type="radio" name="q13_2" value="2"></td>
+								<td><input type="radio" name="q13_2" value="3"></td>
+								<td><input type="radio" name="q13_2" value="4"></td>
+								<td><input type="radio" name="q13_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">I am confident in the reproducibility of AI-based research findings.</td>
+								<td><input type="radio" name="q13_3" value="1"></td>
+								<td><input type="radio" name="q13_3" value="2"></td>
+								<td><input type="radio" name="q13_3" value="3"></td>
+								<td><input type="radio" name="q13_3" value="4"></td>
+								<td><input type="radio" name="q13_3" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<h3>B. Autonomy and Control</h3>
+				<div class="likert-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Statement</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">Researchers should retain full control over decisions informed by AI outputs.</td>
+								<td><input type="radio" name="q14_1" value="1"></td>
+								<td><input type="radio" name="q14_1" value="2"></td>
+								<td><input type="radio" name="q14_1" value="3"></td>
+								<td><input type="radio" name="q14_1" value="4"></td>
+								<td><input type="radio" name="q14_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI tools should support, not replace, human scientific judgment.</td>
+								<td><input type="radio" name="q14_2" value="1"></td>
+								<td><input type="radio" name="q14_2" value="2"></td>
+								<td><input type="radio" name="q14_2" value="3"></td>
+								<td><input type="radio" name="q14_2" value="4"></td>
+								<td><input type="radio" name="q14_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Increased AI use reduces researchers’ autonomy in decision-making.</td>
+								<td><input type="radio" name="q14_3" value="1"></td>
+								<td><input type="radio" name="q14_3" value="2"></td>
+								<td><input type="radio" name="q14_3" value="3"></td>
+								<td><input type="radio" name="q14_3" value="4"></td>
+								<td><input type="radio" name="q14_3" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<h3>C. Displacement and Role Change</h3>
+				<div class="likert-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Statement</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">AI will significantly change the roles of researchers in my field.</td>
+								<td><input type="radio" name="q15_1" value="1"></td>
+								<td><input type="radio" name="q15_1" value="2"></td>
+								<td><input type="radio" name="q15_1" value="3"></td>
+								<td><input type="radio" name="q15_1" value="4"></td>
+								<td><input type="radio" name="q15_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI adoption threatens some traditional research roles.</td>
+								<td><input type="radio" name="q15_2" value="1"></td>
+								<td><input type="radio" name="q15_2" value="2"></td>
+								<td><input type="radio" name="q15_2" value="3"></td>
+								<td><input type="radio" name="q15_2" value="4"></td>
+								<td><input type="radio" name="q15_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI will create new research opportunities that did not previously exist.</td>
+								<td><input type="radio" name="q15_3" value="1"></td>
+								<td><input type="radio" name="q15_3" value="2"></td>
+								<td><input type="radio" name="q15_3" value="3"></td>
+								<td><input type="radio" name="q15_3" value="4"></td>
+								<td><input type="radio" name="q15_3" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<h3>D. Augmentation and Productivity</h3>
+				<div class="likert-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Statement</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">AI tools increase my efficiency as a researcher.</td>
+								<td><input type="radio" name="q16_1" value="1"></td>
+								<td><input type="radio" name="q16_1" value="2"></td>
+								<td><input type="radio" name="q16_1" value="3"></td>
+								<td><input type="radio" name="q16_1" value="4"></td>
+								<td><input type="radio" name="q16_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI enables analyses that would otherwise be infeasible.</td>
+								<td><input type="radio" name="q16_2" value="1"></td>
+								<td><input type="radio" name="q16_2" value="2"></td>
+								<td><input type="radio" name="q16_2" value="3"></td>
+								<td><input type="radio" name="q16_2" value="4"></td>
+								<td><input type="radio" name="q16_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">AI improves the quality of research outputs.</td>
+								<td><input type="radio" name="q16_3" value="1"></td>
+								<td><input type="radio" name="q16_3" value="2"></td>
+								<td><input type="radio" name="q16_3" value="3"></td>
+								<td><input type="radio" name="q16_3" value="4"></td>
+								<td><input type="radio" name="q16_3" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<h3>E. Ethical and Societal Concerns</h3>
+				<div class="likert-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Statement</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="statement-text">AI use in health research raises important ethical concerns.</td>
+								<td><input type="radio" name="q17_1" value="1"></td>
+								<td><input type="radio" name="q17_1" value="2"></td>
+								<td><input type="radio" name="q17_1" value="3"></td>
+								<td><input type="radio" name="q17_1" value="4"></td>
+								<td><input type="radio" name="q17_1" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Existing ethical frameworks are sufficient for governing AI research.</td>
+								<td><input type="radio" name="q17_2" value="1"></td>
+								<td><input type="radio" name="q17_2" value="2"></td>
+								<td><input type="radio" name="q17_2" value="3"></td>
+								<td><input type="radio" name="q17_2" value="4"></td>
+								<td><input type="radio" name="q17_2" value="5"></td>
+							</tr>
+							<tr>
+								<td class="statement-text">Greater oversight is needed for AI-based research methods.</td>
+								<td><input type="radio" name="q17_3" value="1"></td>
+								<td><input type="radio" name="q17_3" value="2"></td>
+								<td><input type="radio" name="q17_3" value="3"></td>
+								<td><input type="radio" name="q17_3" value="4"></td>
+								<td><input type="radio" name="q17_3" value="5"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="card">
+				<p class="section-description"><strong>For each statement below, indicate how often or how intensely you have experienced this <u><i>in the past 6 months</i></u>, using the scale:</strong></p>
+				<div class="sticky-header">
+					1: Low/Never | 5: Moderate/Sometimes | 10: High/Constant
+				</div>
+				<h3>F. Career Impact Sentiment Spectrum</h3>
+				<div class="exp-item">
+					I believe that AI will solve my field's greatest challenges rather than diminish my professional role or integrity.
+					<div class="scale-row" id="row_q18"></div>
+				</div>
+				<h3>G. Emotional & Cognitive Experiences</h3>
+				<div class="exp-item">
+					I feel that not adopting AI is a significant risk to my career longevity, grant success, or publication impact.
+					<div class="scale-row" id="row_q19"></div>
+				</div>
+				<div class="exp-item">
+					I experience "Information Fatigue"—the cognitive cost of staying current with AI news outweighs the utility of the tools.
+					<div class="scale-row" id="row_q20"></div>
+				</div>
+				<div class="exp-item">
+					I am concerned that "Black Box" algorithms will lead to clinical or scientific errors for which I am personally responsible.
+					<div class="scale-row" id="row_q21"></div>
+				</div>
+				<div class="exp-item">
+					I find it increasingly difficult to remain skeptical of AI outputs when they appear polished and authoritative.
+					<div class="scale-row" id="row_q22"></div>
+				</div>
+				<div class="exp-item">
+					Using AI to assist in drafting, coding, or analysis makes the final research output feel "less mine" or less authentic.
+					<div class="scale-row" id="row_q23"></div>
+				</div>
+				<div class="exp-item">
+					I feel "distanced" from my raw data because the heavy lifting of interpretation is being handled by a machine.
+					<div class="scale-row" id="row_q24"></div>
+				</div>
+				<div class="exp-item">
+					I feel energized and empowered by the unprecedented speed and scale I can achieve using AI.
+					<div class="scale-row" id="row_q25"></div>
+				</div>
+				<div class="exp-item">
+					I feel I have developed the necessary "AI intuition" to effectively direct these tools toward valid scientific goals.
+					<div class="scale-row" id="row_q26"></div>
+				</div>
+				<div class="exp-item">
+					I am concerned that my core technical or critical thinking skills are "atrophying" due to AI reliance.
+					<div class="scale-row" id="row_q27"></div>
+				</div>
+				<div class="exp-item">
+					I spend excessive time "fine-tuning" AI prompts or workflows at the expense of primary scientific inquiry.
+					<div class="scale-row" id="row_q28"></div>
+				</div>
+				<p class="section-description">
+					Are there any other psychological or cognitive impacts of AI on your work that were not captured by the questions above? Please describe them here.
+				</p>
+				<textarea name="q29_comments" style="width: 100%; box-sizing: border-box; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>
+			</div>
+			<div class="card">
+				<h3>H. CONFLICT RESOLUTION</h3>
+				<p class="section-description">
+					In a scenario where a validated AI model provides a result that directly contradicts your professional intuition or clinical gut feeling, how are you most likely to respond?
+				</p>
+				<div class="radio-group">
+					<label class="radio-option">
+					<input type="radio" name="q30_res" value="1">
+					<span class="option-content">
+					I would assume the model is hallucinating or biased and follow my own intuition.
+					</span>
+					</label>
+					<label class="radio-option">
+					<input type="radio" name="q30_res" value="2">
+					<span class="option-content">
+					I would assume the model has detected a pattern I missed and follow the AI's lead.
+					</span>
+					</label>
+					<label class="radio-option">
+					<input type="radio" name="q30_res" value="3">
+					<span class="option-content">
+					I would pause to seek third-party validation or an "Explainable AI" (XAI) breakdown before proceeding.
+					</span>
+					</label>
+				</div>
+				<p class="section-description">If none of the above fully capture your approach, please describe how you would navigate this discrepancy between AI output and your professional judgment.</p>
+				<textarea name="q31_comments" style="width: 100%; box-sizing: border-box; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></textarea>
+				<div class="button-container">
+					<button id="prevBtn" type="button" class="btn-secondary">Previous</button>
+					<button id="nextBtn" type="button" class="btn-primary">Next</button>
+				</div>
+			</div>
+		</div>
+		<div id="customAlert" class="modal-overlay">
+			<div class="modal-box">
+				<h3>Incomplete Questions</h3>
+				<p>It looks like you missed some questions. We've highlighted them for you.</p>
+				<button id="closeAlertBtn" type="button">OK</button>
+			</div>
+		</div>
+		</div>
+	</body>
+	<script>
+		// Loop to generate 1-10 buttons
+		const rows = ['spectrum', 'fomo', 'overload', 'dread', 'bias', 'imposter', 'alienation', 'thrill', 'efficacy', 'offload', 'optimize'];
+		
+		rows.forEach(r => {
+			const el = document.getElementById(`row_${r}`);
+			for(let i=1; i<=10; i++) {
+				el.innerHTML += `<div class="scale-item">
+					<input type="radio" name="n_${r}" value="${i}" id="${r}_${i}">
+					<label for="${r}_${i}">${i}</label>
+				</div>`;
+			}
+		});
+	</script>
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+		import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+		
+		// --- 1. FIREBASE CONFIG ---
+		const firebaseConfig = {
+			apiKey: "AIzaSyCoHmEBbmo9JB8M69O5Udu_9aVZC7ZOEPc",
+			authDomain: "research-healthai-perception.firebaseapp.com",
+			projectId: "research-healthai-perception",
+			storageBucket: "research-healthai-perception.firebasestorage.app",
+			messagingSenderId: "711118612360",
+			appId: "1:711118612360:web:466d7bce64aa56954d7c3d",
+			measurementId: "G-R33FXV0290"
+		};
+		
+		const app = initializeApp(firebaseConfig);
+		const db = getFirestore(app);
+		
+		// --- 2. IDENTITY & TIMING ---
+		// Ensure we use the same UID from Section 1
+		const uid = localStorage.getItem('survey_uid') || 'anonymous';
+		
+		const getFormattedDate = (date = new Date()) => {
+			const pad = (num, size) => num.toString().padStart(size, '0');
+			const y = date.getFullYear();
+			const m = pad(date.getMonth() + 1, 2);
+			const d = pad(date.getDate(), 2);
+			const h = pad(date.getHours(), 2);
+			const min = pad(date.getMinutes(), 2);
+			const s = pad(date.getSeconds(), 2);
+			const ms = pad(date.getMilliseconds(), 3);
+			return `${y}-${m}-${d} ${h}:${min}:${s}.${ms}`;
+		};
+		
+		const startLocal = getFormattedDate();
+		const startUTC = new Date().toISOString().replace('T', ' ').replace('Z', ''); 
+		
+		// --- 3. DYNAMIC BUTTON GENERATION (q18 - q28) ---
+		const rows10 = {
+			'q18': 'q18_optimism', 'q19': 'q19_fomo', 'q20': 'q20_overload',
+			'q21': 'q21_dread', 'q22': 'q22_bias', 'q23': 'q23_imposter',
+			'q24': 'q24_alienation', 'q25': 'q25_thrill', 'q26': 'q26_efficacy',
+			'q27': 'q27_offload', 'q28': 'q28_optimize'
+		};
+		
+		Object.keys(rows10).forEach(id => {
+			const el = document.getElementById(`row_${id}`);
+			if (el) {
+				el.innerHTML = ''; 
+				for (let i = 1; i <= 10; i++) {
+					el.innerHTML += `
+						<div class="scale-item">
+						<input type="radio" name="${rows10[id]}" value="${i}" id="${id}_${i}">
+						<label for="${id}_${i}">${i}</label>
+						</div>`;
+				}
+			}
+		});
+		
+		// --- 4. SYNC DATA FUNCTION ---
+		async function syncData() {
+			const getRadio = (name) => {
+				const val = document.querySelector(`input[name="${name}"]:checked`)?.value;
+				return val ? parseInt(val) : 0;
+			};
+		
+			const getText = (name) => document.querySelector(`[name="${name}"]`)?.value || "";
+		
+			const payload = {
+				uid: uid,
+				// OBJECT A: Numeric data for research
+				section_2: {
+					metadata: {
+						start_local: startLocal,
+						start_utc: startUTC,
+						last_sync_local: getFormattedDate(),
+						server_ts: serverTimestamp()
+					},
+					q13_trust: [getRadio('q13_1'), getRadio('q13_2'), getRadio('q13_3')],
+					q14_autonomy: [getRadio('q14_1'), getRadio('q14_2'), getRadio('q14_3')],
+					q15_role_change: [getRadio('q15_1'), getRadio('q15_2'), getRadio('q15_3')],
+					q16_productivity: [getRadio('q16_1'), getRadio('q16_2'), getRadio('q16_3')],
+					q17_ethics: [getRadio('q17_1'), getRadio('q17_2'), getRadio('q17_3')],
+					q18_optimism: getRadio('q18_optimism'),
+					q19_fomo: getRadio('q19_fomo'),
+					q20_overload: getRadio('q20_overload'),
+					q21_dread: getRadio('q21_dread'),
+					q22_bias: getRadio('q22_bias'),
+					q23_imposter: getRadio('q23_imposter'),
+					q24_alienation: getRadio('q24_alienation'),
+					q25_thrill: getRadio('q25_thrill'),
+					q26_efficacy: getRadio('q26_efficacy'),
+					q27_offload: getRadio('q27_offload'),
+					q28_optimize: getRadio('q28_optimize'),
+					q29_comments: getText('q29_comments'),
+					q30_conflict_strategy: getRadio('q30_res'),
+					q31_comments: getText('q31_comments')
+				},
+				// OBJECT B: String data for form persistence
+				form_state_2: {
+					// Captures all radio values as strings
+					radios: Array.from(document.querySelectorAll('input[type="radio"]:checked')).map(r => ({name: r.name, val: r.value})),
+					q29_comments: getText('q29_comments'),
+					q31_comments: getText('q31_comments')
+				}
+			};
+		
+			try {
+				await setDoc(doc(db, "survey_data", uid), payload, { merge: true });
+				console.log("Section 2 updated.");
+			} catch (e) {
+				console.error("Firebase Error: ", e);
+			}
+		}
+		
+		// --- 5. RESUME LOGIC ---
+		async function loadAndRestore() {
+			try {
+				const docRef = doc(db, "survey_data", uid);
+				const docSnap = await getDoc(docRef);
+		
+				if (docSnap.exists() && docSnap.data().form_state_2) {
+					const state = docSnap.data().form_state_2;
+					
+					// Restore Radios
+					if (state.radios) {
+						state.radios.forEach(r => {
+							const el = document.querySelector(`input[name="${r.name}"][value="${r.val}"]`);
+							if (el) el.checked = true;
+						});
+					}
+					// Restore Textareas
+					document.querySelector('[name="q29_comments"]').value = state.q29_comments || "";
+					document.querySelector('[name="q31_comments"]').value = state.q31_comments || "";
+					
+					console.log("Section 2 restored.");
+				}
+			} catch (e) { console.error("Restore error:", e); }
+			initListeners();
+		}
+		
+		// This makes the function "Global" so the HTML button can see it
+		window.closeAlert = function() {
+			const modal = document.getElementById('customAlert');
+			if (modal) {
+				modal.style.display = 'none';
+			}
+		};
+		 
+		function initListeners() {
+			document.getElementById('closeAlertBtn')?.addEventListener('click', window.closeAlert);
+		
+			document.addEventListener('change', (e) => {
+				if (e.target.type === 'radio') syncData();
+			});
+			document.querySelectorAll('textarea').forEach(txt => {
+				txt.addEventListener('input', syncData);
+			});
+		}
+		
+		// --- 6. VALIDATION & NEXT NAVIGATION ---
+		let validationAttempts = 0;
+		
+		document.getElementById('nextBtn').addEventListener('click', async () => {
+			document.querySelectorAll('.missing-field').forEach(el => el.classList.remove('missing-field'));
+			let missingAny = false;
+		
+			// Table Validation (q13-q17)
+			['q13','q14','q15','q16','q17'].forEach(q => {
+				[1,2,3].forEach(num => {
+					const name = `${q}_${num}`;
+					if (!document.querySelector(`input[name="${name}"]:checked`)) {
+						document.querySelector(`input[name="${name}"]`)?.closest('tr')?.classList.add('missing-field');
+						missingAny = true;
+					}
+				});
+			});
+		
+			// 1-10 Scale Validation
+			// WITH THIS (Safe version):
+			Object.values(rows10).forEach(qName => {
+				const input = document.querySelector(`input[name="${qName}"]`);
+				if (input && !document.querySelector(`input[name="${qName}"]:checked`)) {
+					// Try to find the container to highlight, but don't crash if missing
+					input.closest('.card, .q-wrap, .scale-container')?.classList.add('missing-field');
+					missingAny = true;
+				}
+			});
+		
+			if (!document.querySelector(`input[name="q30_res"]:checked`)) {
+				document.querySelector('.radio-group')?.classList.add('missing-field');
+				missingAny = true;
+			}
+		
+			if (missingAny && validationAttempts === 0) {
+				const modal = document.getElementById('customAlert');
+				if (modal) {
+					modal.style.display = 'flex';
+				} else {
+					// Fallback if the HTML modal is missing
+					alert("It looks like you missed some questions. We've highlighted them for you.");
+				}
+		
+				validationAttempts++;
+				// Use optional chaining (?.) to prevent crashes if no field is found
+				document.querySelector('.missing-field')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				return;
+			}
+		
+			const btn = document.getElementById('nextBtn');
+			btn.disabled = true;
+			btn.innerText = "Saving...";
+			await syncData();
+			window.location.href = "section_3.html";
+		});
+		
+		// PREVIOUS BUTTON LOGIC (No validation needed to go back)
+		const prevBtn = document.getElementById('prevBtn');
+		if (prevBtn) {
+			prevBtn.addEventListener('click', async () => {
+				prevBtn.disabled = true;
+				prevBtn.innerText = "Saving...";
+				
+				await syncData(); // Save whatever they have before going back
+				window.location.href = "section_1.html";
+			});
+		}
+		// Execute Restore
+		loadAndRestore();
+	</script>
+</html>
